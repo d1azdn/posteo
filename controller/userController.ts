@@ -100,37 +100,43 @@ async function createUser(req:Request, res:Response){
 }
 
 async function loginUser(req:Request, res:Response){
-    const { usernameReq, password } = req.body
+    try{
+        const { username, password } = req.body
 
-    const userFind = await prisma.user.findFirst({
-        where:{
-            username : usernameReq
-        },
-    })
-    if (!userFind){
+        const userFind = await prisma.user.findFirst({
+            where:{
+                username : username
+            }
+        })
+        if (!userFind){
+            res.status(200).json({
+                status : "failed",
+                message : "Username or password is incorrect."})
+            return
+        }
+
+        const passCheck = await bcrypt.compare(password, userFind.password)
+        if(!passCheck){
+            res.status(200).json({
+                status : "failed",
+                message : "Username or password is incorrect."})
+            return
+        }
+
+        //password variables conflict, so needed to specify the type using _, typescript :)
+        const { password:_, ...userData } = userFind
+        const token = jwt.sign(userData, process.env.SECRET_KEY, { expiresIn:"1h" })
+
         res.status(200).json({
-            status : "failed",
-            message : "Username or password is incorrect."})
-        return
+            status : "success",
+            message : "Have fun login!",
+            data : "Bearer "+token
+        })
+    } catch (error) {
+        res.status(500).json({
+            status : "error",
+            message : "Internal server error."})
     }
-
-    const passCheck = await bcrypt.compare(password, userFind.password)
-    if(!passCheck){
-        res.status(200).json({
-            status : "failed",
-            message : "Username or password is incorrect."})
-        return
-    }
-
-    const { id, username, roleId } = userFind
-    const userData = {id,username,roleId}
-    const token = jwt.sign(userData, process.env.SECRET_KEY, { expiresIn:"1h" })
-
-    res.status(200).json({
-        status : "success",
-        message : "Have fun login!",
-        data : token
-    })
 }
 
 export { readOneUser, readAllUser, createUser, loginUser };
