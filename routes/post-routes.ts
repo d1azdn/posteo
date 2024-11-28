@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createUser, readAllUser } from "../controller/post-controller";
+import { createUser, loginUser, readAllUser, readOneUser } from "../controller/userController";
 import bcrypt from "bcrypt";
 
 const routes = express.Router();
@@ -8,7 +8,9 @@ routes.get("/", (req:Request, res:Response)=>{
     res.status(200).send('halo');
 });
 
-routes.get("/users", readAllUser)
+routes.get("/userall", readAllUser)
+routes.get("/user/:username", readOneUser)
 routes.post("/register", createUser)
+routes.post("/login", loginUser)
 
 export { routes }
