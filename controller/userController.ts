@@ -47,6 +47,7 @@ async function readOneUser(req:Request,res:Response){
 async function readAllUser(req:Request,res:Response){
     try {
         const users = await prisma.user.findMany();
+
         res.status(200).json({
             status : "success",
             message : "All username has been found.",
@@ -65,7 +66,10 @@ async function createUser(req:Request, res:Response){
         const { username, password } = req.body;
 
         if(!username || !password){
-            res.status(400).send("Username or password required.")
+            res.status(400).json({
+                status : "failed",
+                message : "Username and password required."
+            })
         }
 
         const salt = await bcrypt.genSalt(10);

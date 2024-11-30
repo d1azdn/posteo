@@ -8,11 +8,14 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(cuid())
-  username String @unique
-  password String
-  roleId   Int    @default(1)
-  role     Role   @relation(fields: [roleId], references:[id])
+  id            String @id @default(cuid())
+  username      String @unique
+  password      String
+  roleId        Int    @default(1)
+  likePost      PostLiked[]
+  dislikePost   PostDisliked[]
+  authorPost    Post[]
+  role          Role   @relation(fields: [roleId], references:[id])
 }
 
 model Role {
@@ -21,12 +24,30 @@ model Role {
   user      User[]
 }
 
+model PostLiked {
+  id      Int     @id @default(autoincrement())
+  postId  Int
+  userId  String
+  user    User    @relation(fields: [userId], references:[id])
+}
+
+model PostDisliked {
+  id      Int     @id @default(autoincrement())
+  postId  Int
+  userId  String
+  User    User    @relation(fields: [userId], references:[id])
+}
+
 model Post {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
+  userId    String
   createdAt DateTime @default(now())
   title     String   @default("")
   content   String
-  passcode  String   @default("")
+  likes     Int      @default(0)
+  dislikes  Int      @default(0)
+
+  user    User @relation(fields: [userId], references: [id])
 }
 
 
