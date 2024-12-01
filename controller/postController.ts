@@ -119,10 +119,15 @@ async function createPost(req:RequestType, res:Response){
     }
 }
 
-async function deletePost(req:Request, res:Response){
+async function deletePost(req:RequestType, res:Response){
     try{
         const postId = parseInt(req.params.id)
-        const post = await checkPost(postId)
+        const post = await prisma.post.findFirst({
+            where: {
+                id : postId,
+                userId: req.user.id
+            }
+        })
         if (!post){
             res.status(200).json({
                 status : "failed",
